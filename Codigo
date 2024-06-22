@@ -1,0 +1,141 @@
+% Declaraciones dinámicas
+:- dynamic producto/3.
+:- dynamic cliente/4.
+:- dynamic venta/5.
+:- dynamic stock/2.
+% Hechos
+% Productos y componentes
+producto(bloques_construccion, [(plastico, 500), (colorante, 100), (madera, 150), (goma,
+120), (metal, 10)], 1500).
+producto(muneca, [(plastico, 200), (tela, 100), (pintura, 50), (pelo, 100), (goma, 160)], 1200).
+producto(rompecabezas, [(carton, 300), (impresion, 100), (papel, 100), (plasticola, 100),
+(colores, 100)], 800).
+producto(juego_mesa, [(carton, 400), (plastico, 200), (impresion, 150), (piezas, 100),
+(colores, 10)], 2000).
+producto(peluche, [(tela, 300), (relleno, 200), (ojos_plastico, 50), (felpa, 100), (colorante,
+180)], 1300).
+producto(coche_juguete, [(plastico, 400), (metal, 200), (pintura, 100), (ruedas, 120), (colores,
+100)], 2500).
+producto(lego, [(plastico, 500), (colorante, 100), (piezas, 120), (encastres, 100), (metal, 10)],
+1800).
+producto(balon_futbol, [(cuero, 600), (hilo, 50), (plastico, 100), (colores, 170), (aguja, 10)],
+1600).
+producto(patineta, [(madera, 800), (ruedas, 300), (tornillos, 140), (piezas, 100), (pintura,
+100)], 2200).
+producto(cometa, [(tela, 200), (varillas, 100), (cuerda, 50), (colorante, 100), (papel, 100)],
+700).
+% Datos de clientes
+cliente(1, 'Juan Perez', 'Calle Falsa 123', '1111-1111').
+cliente(2, 'Ana Gomez', 'Avenida Siempre Viva 742', '2222-2222').
+cliente(3, 'Luis Fernandez', 'Boulevard Los Arcos 456', '3333-3333').
+cliente(4, 'Marta Lopez', 'Calle Elm 789', '4444-4444').
+cliente(5, 'Carlos Ramirez', 'Avenida Central 101', '5555-5555').
+% Datos de ventas
+venta(1, '2023-01-15', 1, bloques_construccion, 2).
+venta(2, '2023-02-20', 2, muneca, 1).
+venta(3, '2023-03-10', 3, rompecabezas, 3).
+venta(4, '2023-04-05', 4, juego_mesa, 1).
+venta(5, '2023-05-15', 5, peluche, 2).
+venta(6, '2023-06-01', 1, coche_juguete, 1).
+venta(7, '2023-07-07', 2, lego, 4).
+venta(8, '2023-08-15', 3, balon_futbol, 1).
+venta(9, '2023-09-20', 4, patineta, 2).
+venta(10, '2023-10-30', 5, cometa, 5).
+% Datos de stock
+stock(bloques_construccion, 50).
+stock(muneca, 30).
+stock(rompecabezas, 40).
+stock(juego_mesa, 20).
+stock(peluche, 25).
+stock(coche_juguete, 15).
+stock(lego, 60).
+stock(balon_futbol, 35).
+stock(patineta, 10).
+stock(cometa, 50).
+% Consultas
+% Lista de clientes
+lista_clientes :-
+findall((Id, Nombre, Direccion, Telefono), cliente(Id, Nombre, Direccion, Telefono),
+Clientes),
+writeln(Clientes).
+% Lista de productos
+lista_productos :-
+findall((Nombre, Componentes, Precio), producto(Nombre, Componentes, Precio),
+Productos),
+writeln(Productos).
+% Lista de ventas
+lista_ventas :-
+findall((IdVenta, Fecha, IdCliente, NombreProducto, Cantidad), venta(IdVenta, Fecha,
+IdCliente, NombreProducto, Cantidad), Ventas),
+writeln(Ventas).
+% Lista de stock
+lista_stock :-
+findall((NombreProducto, Cantidad), stock(NombreProducto, Cantidad), Stock),
+writeln(Stock).
+% Compras de un cliente específico
+compras_cliente(IdCliente) :-
+findall((Fecha, NombreProducto, Cantidad), venta(_, Fecha, IdCliente, NombreProducto,
+Cantidad), Compras),
+writeln(Compras).
+% Ventas de un producto
+ventas_producto(NombreProducto) :-
+findall((Fecha, IdCliente, Cantidad), venta(_, Fecha, IdCliente, NombreProducto,
+Cantidad), Ventas),
+writeln(Ventas).
+% Ventas entre dos fechas
+ventas_entre_fechas(FechaInicio, FechaFin) :-
+findall((Fecha, IdCliente, NombreProducto, Cantidad), (venta(_, Fecha, IdCliente,
+NombreProducto, Cantidad), Fecha @>= FechaInicio, Fecha @=< FechaFin), Ventas),
+writeln(Ventas).
+% Cliente con más compras (cantidad de compras realizadas)
+cliente_mas_compras :-
+findall(IdCliente, venta(_, _, IdCliente, _, _), Clientes),
+sort(Clientes, ClientesUnicos),
+maplist(contar_compras, ClientesUnicos, Contadores),
+max_member((MaxCompras, IdMax), Contadores),
+cliente(IdMax, Nombre, _, _),
+format('Cliente con más compras: ~w (~w compras)', [Nombre, MaxCompras]).
+% Contar el número de compras de un cliente
+contar_compras(IdCliente, (NumCompras, IdCliente)) :-
+aggregate_all(count, venta(_, _, IdCliente, _, _), NumCompras).
+% Cliente con la compra mayor (monto)
+cliente_compra_mayor :-
+findall((Monto, IdCliente, IdVenta), (venta(IdVenta, _, IdCliente, NombreProducto,
+Cantidad), producto(NombreProducto, _, Precio), Monto is Precio * Cantidad), Compras),
+max_member((MaxMonto, IdMaxCliente, IdVentaMax), Compras),
+cliente(IdMaxCliente, Nombre, _, _),
+format('Cliente con la compra mayor: ~w (Monto: ~2f, Venta: ~w)', [Nombre, MaxMonto,
+IdVentaMax]).
+% Compras con montos mayores y menores determinados
+compras_entre_montos(MinMonto, MaxMonto) :-
+findall((Monto, IdCliente, IdVenta), (venta(IdVenta, _, IdCliente, NombreProducto,
+Cantidad), producto(NombreProducto, _, Precio), Monto is Precio * Cantidad, Monto >=
+MinMonto, Monto =< MaxMonto), Compras),
+writeln(Compras).
+% Listar productos y sus componentes
+listar_productos_componentes :-
+findall((Nombre, Componentes), producto(Nombre, Componentes, _),
+ProductosComponentes),
+writeln(ProductosComponentes).
+% Actualizar stock después de una venta
+actualizar_stock(NombreProducto, CantidadVendida) :-
+stock(NombreProducto, StockActual),
+NuevoStock is StockActual - CantidadVendida,
+retract(stock(NombreProducto, StockActual)),
+assert(stock(NombreProducto, NuevoStock)).
+% Realizar una venta
+realizar_venta(IdVenta, Fecha, IdCliente, NombreProducto, Cantidad) :-
+stock(NombreProducto, StockActual),
+StockActual >= Cantidad,
+actualizar_stock(NombreProducto, Cantidad),
+assert(venta(IdVenta, Fecha, IdCliente, NombreProducto, Cantidad)).
+% Manejar venta sin stock suficiente
+realizar_venta(_,_,_, NombreProducto, Cantidad) :-
+stock(NombreProducto, StockActual),
+StockActual < Cantidad,
+format('No hay suficiente stock de ~w para realizar la venta.', [NombreProducto]).
+% Nueva venta de ejemplo
+nueva_venta :-
+realizar_venta(12, '2024-06-09', 3, patineta, 9). % En esta funcion hago un llamado a la
+funcion realizar venta y recibe por parametro (ID venta, fecha, IdCliente, NombreProducto,
+Cantidad ) y la funcion agrega la venta y actualiza el stock
