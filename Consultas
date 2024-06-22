@@ -1,0 +1,21 @@
+--Lista de: clientes, productos, ventas, stock
+lista_clientes.
+lista_productos.
+lista_ventas.
+lista_stock.
+--Compras de un cliente específico
+compras_cliente(IdCliente = 3).
+--Ventas de un producto
+ventas_producto(NombreProducto = rompecabezas).
+--Ventas entre dos fechas
+ventas_entre_fechas(FechaInicio = '2024-06-19', FechaFin = '2024-08-12').
+--Cliente con más compras (cantidad de compras realizadas)
+cliente_mas_compra.
+--Cliente con la compra mayor (monto)
+cliente_compra_mayor. % editar la nueva venta si quiero ver cambios.
+--Compra con montos mayores y menores determinados
+compras_entre_montos(MinMonto = 7100, MaxMonto = 200000).
+--Listar cada producto y los componentes necesarios para elaborarlo
+listar_productos_componentes.
+--Nueva venta
+realizar_venta(12, '2024-06-09', 3, patineta, 9).
